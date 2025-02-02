@@ -7,9 +7,6 @@ from selenium.webdriver.support.select import Select
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.by import By
 
-URL = 'https://omayo.blogspot.com/'
-URL_2 = 'https://demoqa.com/webtables'
-
 
 @pytest.fixture
 def driver():
@@ -24,13 +21,12 @@ def driver():
 
 
 def test_level_1(driver):
-    driver.get(URL)
-    el = driver.find_element(By.ID, 'textbox1')
-    el.send_keys('Selenium Test')
+    driver.get('https://omayo.blogspot.com/')
+    driver.find_element(By.ID, 'textbox1').send_keys('Selenium Test')
 
 
 def test_level_2(driver):
-    driver.get(URL)
+    driver.get('https://omayo.blogspot.com/')
     drop = driver.find_element(By.ID, "drop1")
     select = Select(drop)
     time.sleep(3)
@@ -40,7 +36,7 @@ def test_level_2(driver):
 
 
 def test_level_3(driver):
-    driver.get(URL_2)
+    driver.get('https://demoqa.com/webtables')
     add = driver.find_element(By.ID, 'addNewRecordButton')
     add.click()
     driver.find_element(By.ID, 'firstName').send_keys('John')
