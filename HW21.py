@@ -10,10 +10,13 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.firefox.service import Service
+from selenium.webdriver.firefox.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
-
+from webdriver_manager.firefox import GeckoDriverManager
 download_dir = "C:/Users/48574/Downloads"
 file_name = "file-sample_100kB.doc"
+
 
 @pytest.fixture
 def driver():
@@ -30,18 +33,30 @@ def driver_rus():
     options = Options()
     options.add_argument("--start-maximized")
     options.add_argument("--lang=ru")
-    options.add_experimental_option('prefs', {
-        'download.default_directory': download_dir,
-        'download.prompt_for_download': False,
-        'plugins.always_open_pdf_externally': True,
-        'download.directory_upgrade': True,
-        "safebrowsing.enabled": True
-    })
-    service = Service(ChromeDriverManager().install())
-    config_driver = webdriver.Chrome(service=service, options=options)
+    options.set_preference("browser.download.dir", download_dir)
+    options.set_preference("browser.download.folderList", 2)
+    options.set_preference("browser.helperApps.neverAsk.saveToDisk", "application/pdf")
+    options.set_preference("browser.download.manager.showWhenStarting", False)
+    options.set_preference("pdfjs.disabled", True)  # Открывать PDF вне браузера
+    service = Service(GeckoDriverManager().install())
+    config_driver = webdriver.Firefox(service=service, options=options)
     yield config_driver
     config_driver.quit()
 
+
+@pytest.fixture
+def driver_firefox():
+    options = Options()
+    options.add_argument("--start-maximized")
+    options.set_preference("browser.download.dir", download_dir)
+    options.set_preference("browser.download.folderList", 2)
+    # options.set_preference("browser.helperApps.neverAsk.saveToDisk", "application/pdf")
+    # options.set_preference("browser.download.manager.showWhenStarting", False)
+    # options.set_preference("pdfjs.disabled", True)  # Открывать PDF вне браузера
+    service = Service(GeckoDriverManager().install())
+    config_driver = webdriver.Firefox(service=service, options=options)
+    yield config_driver
+    config_driver.quit()
 
 def test_work_action(driver):
     driver.get('https://jqueryui.com/droppable/')
@@ -105,25 +120,51 @@ def test_capabilities(driver_rus):
     print("Текст:", driver_rus.find_element(By.CSS_SELECTOR, 'div[id = "SIvCob"]').text)
 
 
-def test_capabilities_pdf(driver_rus):
-    wait = WebDriverWait(driver_rus, 10)
-    driver_rus.get("https://file-examples.com")
-    
-    close_cookie_window(download_dir)
+def test_task4_2(driver_firefox):
+    """Test to download a file and verify the download."""
+    download_dir = "C:/Users/48574/Downloads"
+    file_name = "file-sample_100kB.doc"
 
-    wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="menu-item-27"]/a'))).click()
+    # Set up explicit wait
+    wait = WebDriverWait(driver_firefox, 10)
 
-    # assert "index.php/sample-documents-download/" in driver_rus.current_url, "Failed to navigate to documents page"
+    # Open the website
+    driver_firefox.get("https://file-examples.com/")
 
-    wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "#table-files > tbody > tr > td.text-right.file-link > a")))
-    pdf_download = driver_rus.find_element(By.CSS_SELECTOR, '#table-files > tbody > tr > td.text-right.file-link > a')
-    wait.until(EC.element_to_be_clickable(pdf_download)).click()
-    close_ads(driver_rus)
+    # Close popups
+    close_cookie_window(driver_firefox)
+    close_ads(driver_firefox)
 
-    file_size = driver_rus.find_element(By.XPATH, '//*[@id="table-files"]/tbody/tr[1]/td[5]/a')
-    scroll_element(driver_rus, file_size)
-    wait.until(EC.element_to_be_clickable(file_size)).click()
-    check = os.listdir(download_dir)
+    # Click menu item
+    wait.until(EC.element_to_be_clickable((By.ID, "menu-item-27"))).click()
+    close_ads(driver_firefox)
+
+    # Verify page navigation
+    assert "index.php/sample-documents-download/" in driver_firefox.current_url, "Failed to navigate to documents page"
+
+    # Find and click the download link for DOC/DOCX
+    doc_file = wait.until(EC.presence_of_element_located(
+        (By.XPATH, "//tr[td[@class='file-ext' and contains(text(), 'DOC, DOCX')]]/td[@class='text-right file-link']/a")
+    ))
+    scroll_element(driver_firefox, doc_file)
+    wait.until(EC.element_to_be_clickable(doc_file)).click()
+
+    close_ads(driver_firefox)
+
+    # Verify navigation to file page
+    assert "index.php/sample-documents-download/sample-doc-download/" in driver_firefox.current_url, "Failed to navigate to file page"
+
+    # Click the download button
+    file_sizes = wait.until(EC.presence_of_all_elements_located(
+        (By.CSS_SELECTOR, ".btn.btn-orange.btn-outline.btn-xl.page-scroll.download-button")
+    ))
+
+    scroll_element(driver_firefox, file_sizes[0])
+    wait.until(EC.element_to_be_clickable(file_sizes[0])).click()
+
+    # Check if the file is downloaded
+    check_download(wait, download_dir, file_name)
+    #
 
 
 def close_cookie_window(driver):
@@ -137,8 +178,10 @@ def close_cookie_window(driver):
         print("No cookie banner to close.")
 
 
-def scroll_element(driver, element):
-    driver.execute_script("arguments[0].scrollIntoView();", element)
+def check_download(wait, download_dir, file_name):
+    """Wait for the file to appear in the download directory."""
+    wait.until(lambda driver: os.path.exists(os.path.join(download_dir, file_name)), "File not downloaded")
+    print("Download completed!")
 
 
 def close_ads(driver):
@@ -204,6 +247,7 @@ def close_ads(driver):
         print("Returned to main content.")
 
 
-
+def scroll_element(driver_rus, element):
+    driver_rus.execute_script("arguments[0].scrollIntoView();", element)
 
 
