@@ -1,8 +1,5 @@
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.by import By
-
-from lesson_22.conftest import driver
 
 
 class BasePage():
@@ -22,7 +19,3 @@ class BasePage():
         element = self.find_element(locator, timeout)
         element.clear()
         element.send_keys(text)
-
-    def find_elements(self, locator, timeout=10):
-        WebDriverWait(self.driver, timeout).until(EC.presence_of_element_located(locator))
-        return self.driver.find_elements(*locator)

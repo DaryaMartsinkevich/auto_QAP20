@@ -1,5 +1,5 @@
 from selenium.webdriver.common.by import By
-from lesson_22.pages.base_page import BasePage
+from lesson_23.pages.base_page import BasePage
 
 
 class ProductPage(BasePage):

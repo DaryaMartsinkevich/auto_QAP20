@@ -11,4 +11,3 @@ def test_empty(driver):
     login_page.get_error_message()
 
     assert login_page.get_error_message() == "Epic sadface: Password is required", 'Неверно'
-    # assert login_page.get_error_message() == "Epic sadface: Password is required_1", 'Неверно'

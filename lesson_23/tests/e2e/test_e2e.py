@@ -8,10 +8,7 @@ from lesson_23.pages.products_page import ProductPage
 
 def test_e2e(driver):
     login_page = LoginPage(driver)
-    login_page.get_login_page()
-    login_page.enter_username('standard_user')
-    login_page.enter_password('secret_sauce')
-    login_page.click_login()
+    login_page.valid_login()
     assert "inventory" in driver.current_url, "Ошибка: логин не удался"
 
     products = ProductPage(driver)
