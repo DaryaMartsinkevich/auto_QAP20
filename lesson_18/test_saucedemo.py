@@ -1,4 +1,5 @@
 import pytest
+import allure
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
@@ -6,6 +7,8 @@ from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
 
 
+@allure.feature("Saucedemo")
+@allure.story('Добавить')
 def test_login_and_add_to_cart():
     # Настройка WebDriver
     options = Options()
