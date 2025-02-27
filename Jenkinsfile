@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        CONTAINER_NAME = 'python-tests-container-Дарья'
+        CONTAINER_NAME = 'python-tests-container-Darya'
         ALLURE_RESULTS_DIR = 'target/allure-results'
         JOB_NAME = 'Darya_plp'
     }
