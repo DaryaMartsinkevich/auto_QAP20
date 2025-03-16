@@ -31,3 +31,21 @@ class CreateObj(Endpoint):
     def get_name(self):
         return self.get_data()['name']
 
+    # def get_year(self):
+    #     return self.get_data()['data']['year']
+    #
+    # def get_price(self):
+    #     return self.get_data()['data']['price']
+    #
+    # def get_cpu_model(self):
+    #     return self.get_data()['data']['CPU model']
+    #
+    # def get_hard_disk_size(self):
+    #     return self.get_data()['data']['Hard disk size']
+
+    def get_payload_data(self):
+        return self.get_data()['data']
+
+    def get_id(self):
+        return self.get_data()['id']
+
